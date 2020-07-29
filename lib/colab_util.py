@@ -121,7 +121,7 @@ def generate_video_from_obj(obj_path, image_path, video_path, renderer):
     mesh_wo_tex = Meshes(vers, faces, wo_textures)
 
     # create VideoWriter
-    fourcc = cv2. VideoWriter_fourcc(*'MP4V')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(video_path, fourcc, 20.0, (1024,512))
 
     for i in tqdm(range(90)):

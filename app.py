@@ -1,24 +1,37 @@
 import os
 from lightweight_human_pose_estimation_pytorch.get_pose import get_pose
-from apps import simple_test
-from lib.colab_util import generate_video_from_obj, set_renderer
+from apps.simple_test import run
 
-image_path = '../../sample_images/irene_body.jpg' # example image
+from flask import Flask, render_template, send_file
+from Naked.toolshed.shell import execute_js, muterun_js
 
-image_dir = os.path.dirname(image_path)
-file_name = os.path.splitext(os.path.basename(image_path))[0]
+app = Flask(__name__, template_folder='static')
 
-# output pathes
-obj_path = 'results/pifuhd_final/recon/result_%s_256.obj' % file_name
-out_img_path = 'results/pifuhd_final/recon/result_%s_256.png' % file_name
-video_path = 'results/pifuhd_final/recon/result_%s_256.mp4' % file_name
-video_display_path = 'results/pifuhd_final/result_%s_256_display.mp4' % file_name
+@app.route('/predict')
+def predict():
 
-get_pose(image_path)
+    image_path = 'sample_images/irene_body.jpg'  # example image
 
-simple_test()
+    # output pathes
 
-renderer = set_renderer()
-generate_video_from_obj(obj_path, out_img_path, video_path, renderer)
+    get_pose(image_path)
+
+    run()
+
+    success = execute_js('./static/app.js')
+
+    return send_file(result, mimetype='model/gltf+json')
+
+@app.route('/health')
+def health():
+    return "ok"
+
+@app.route('/')
+def main():
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(debug=False, host='0.0.0.0', port='8104')
+
 
 

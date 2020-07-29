@@ -1,6 +1,11 @@
 *.pyc
 __pycache__
 .idea/
+.DS_Store
 
 *.pt
 *.pth
+
+*/node_modules/
+
+results/

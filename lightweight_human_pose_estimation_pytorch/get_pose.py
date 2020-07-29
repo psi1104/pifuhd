@@ -18,7 +18,6 @@ def get_rect(net, images, height_size=512):
         rect_path = image.replace('.%s' % (image.split('.')[-1]), '_rect.txt')
         img = cv2.imread(image, cv2.IMREAD_COLOR)
         orig_img = img.copy()
-        orig_img = img.copy()
         heatmaps, pafs, scale, pad = demo.infer_fast(net, img, height_size, stride, upsample_ratio, cpu=False)
 
         total_keypoints_num = 0
@@ -72,7 +71,7 @@ def get_rect(net, images, height_size=512):
 def get_pose(image_path):
 
     net = PoseEstimationWithMobileNet()
-    checkpoint = torch.load('checkpoint_iter_370000.pth', map_location='cpu')
+    checkpoint = torch.load('lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth', map_location='cpu')
     load_state(net, checkpoint)
 
     get_rect(net.cuda(), [image_path], 512)
