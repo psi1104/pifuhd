@@ -1,26 +1,59 @@
+import io
 import os
+import sys
+import shutil
+import uuid
+import copy
+
+import threading
+import time
+from queue import Empty, Queue
+
 from lightweight_human_pose_estimation_pytorch.get_pose import get_pose
 from apps.simple_test import run
 
-from flask import Flask, render_template, send_file
+from flask import Flask, request, jsonify, render_template, send_file
+from werkzeug.utils import secure_filename
 from Naked.toolshed.shell import execute_js, muterun_js
+import json
+
+DATA_FOLDER = 'img_data'
+CONVERTER_PATH = './static/converter.js'
 
 app = Flask(__name__, template_folder='static')
 
-@app.route('/predict')
+@app.route('/predict', methods=['POST'])
 def predict():
+    input_file = request.files['source']
 
-    image_path = 'sample_images/irene_body.jpg'  # example image
+    if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
+        return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
 
-    # output pathes
+    f_id = str(uuid.uuid4())
+    fname = secure_filename(input_file.filename)
+
+    # save image to upload folder
+    os.makedirs(os.path.join(DATA_FOLDER, f_id), exist_ok=True)
+    input_file.save(os.path.join(DATA_FOLDER, f_id, fname))
+
+    image_path = os.path.join(DATA_FOLDER, f_id, fname)
 
     get_pose(image_path)
 
-    run()
+    data_path = os.path.join(DATA_FOLDER, f_id)
 
-    success = execute_js('./static/app.js')
+    run(data_path)
 
-    return send_file(result, mimetype='model/gltf+json')
+    # result = muterun_js(CONVERTER_PATH, data_path)
+    # print(type(result.stdout))
+    # result = json.dumps(result.stdout)
+    # print(type(resultß))
+
+    execute_js(CONVERTER_PATH, data_path)
+
+    result = os.path.join(data_path, 'model.gltf')
+
+    return send_file(result, mimetype='gltf/json')
 
 @app.route('/health')
 def health():
@@ -31,7 +64,7 @@ def main():
     return render_template('index.html')
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port='8104')
+    app.run(debug=False, host='0.0.0.0', port='80')
 
 
 

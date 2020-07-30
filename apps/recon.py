@@ -162,7 +162,8 @@ def recon(opt, use_rect=False):
     
     # parser.print_options(opt)
 
-    cuda = torch.device('cuda:%d' % opt.gpu_id)
+    # cuda = torch.device('cuda:%d' % opt.gpu_id)
+    cuda = torch.device('cuda')
 
     if use_rect:
         test_dataset = EvalDataset(opt)
@@ -204,15 +205,16 @@ def recon(opt, use_rect=False):
             if True:
                 test_data = test_dataset[i]
 
-                save_path = '%s/%s/recon/result_%s_%d.obj' % (opt.results_path, opt.name, test_data['name'], opt.resolution)
-
+                # save_path = '%s/%s/recon/result_%s_%d.obj' % (opt.results_path, opt.name, test_data['name'], opt.resolution)
+                save_path = '%s/result.obj' % (opt.results_path)
                 print(save_path)
                 gen_mesh(opt.resolution, netMR, cuda, test_data, save_path, components=opt.use_compose)
             else:
                 for j in range(test_dataset.get_n_person(i)):
                     test_dataset.person_id = j
                     test_data = test_dataset[i]
-                    save_path = '%s/%s/recon/result_%s_%d.obj' % (opt.results_path, opt.name, test_data['name'], j)
+                    # save_path = '%s/%s/recon/result_%s_%d.obj' % (opt.results_path, opt.name, test_data['name'], j)
+                    save_path = '%s/result_%s_%d.obj' % (opt.results_path, test_data['name'], j)
                     gen_mesh(opt.resolution, netMR, cuda, test_data, save_path, components=opt.use_compose)
 
 def reconWrapper(args=None, use_rect=False):

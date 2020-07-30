@@ -71,7 +71,8 @@ def get_rect(net, images, height_size=512):
 def get_pose(image_path):
 
     net = PoseEstimationWithMobileNet()
-    checkpoint = torch.load('lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth', map_location='cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    checkpoint = torch.load('lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth', map_location=device)
     load_state(net, checkpoint)
 
     get_rect(net.cuda(), [image_path], 512)
