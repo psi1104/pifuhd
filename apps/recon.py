@@ -127,8 +127,7 @@ def gen_mesh_imgColor(res, net, cuda, data, save_path, thresh=0.5, use_octree=Tr
     except Exception as e:
         print(e)
 
-
-def recon(opt, use_rect=False):
+def recon(net, opt, use_rect=False):
     # load checkpoints
     state_dict_path = None
     if opt.load_netMR_checkpoint_path is not None:
@@ -138,20 +137,20 @@ def recon(opt, use_rect=False):
         opt.resume_epoch = 0
     else:
         state_dict_path = '%s/%s_train_epoch_%d' % (opt.checkpoints_path, opt.name, opt.resume_epoch)
-    
+
     start_id = opt.start_id
     end_id = opt.end_id
 
     state_dict = None
     if state_dict_path is not None and os.path.exists(state_dict_path):
-        print('Resuming from ', state_dict_path)
-        state_dict = torch.load(state_dict_path)    
+        # print('Resuming from ', state_dict_path)
+        state_dict = torch.load(state_dict_path)
         print('Warning: opt is overwritten.')
         dataroot = opt.dataroot
         resolution = opt.resolution
         results_path = opt.results_path
         loadSize = opt.loadSize
-        
+
         opt = state_dict['opt']
         opt.dataroot = dataroot
         opt.resolution = resolution
@@ -173,19 +172,21 @@ def recon(opt, use_rect=False):
     print('test data size: ', len(test_dataset))
     projection_mode = test_dataset.projection_mode
 
-    opt_netG = state_dict['opt_netG']
-    netG = HGPIFuNetwNML(opt_netG, projection_mode).to(device=cuda)
-    netMR = HGPIFuMRNet(opt, netG, projection_mode).to(device=cuda)
+    # opt_netG = state_dict['opt_netG']
+    # netG = HGPIFuNetwNML(opt_netG, projection_mode).to(device=cuda)
+    # netMR = HGPIFuMRNet(opt, netG, projection_mode).to(device=cuda)
+    #
+    # def set_eval():
+    #     netG.eval()
+    #
+    # # load checkpoints
+    # netMR.load_state_dict(state_dict['model_state_dict'])
 
-    def set_eval():
-        netG.eval()
-
-    # load checkpoints
-    netMR.load_state_dict(state_dict['model_state_dict'])
+    netMR = net
 
     os.makedirs(opt.checkpoints_path, exist_ok=True)
     os.makedirs(opt.results_path, exist_ok=True)
-    os.makedirs('%s/%s/recon' % (opt.results_path, opt.name), exist_ok=True)
+    # os.makedirs('%s/%s/recon' % (opt.results_path, opt.name), exist_ok=True)
 
     if start_id < 0:
         start_id = 0
@@ -194,7 +195,7 @@ def recon(opt, use_rect=False):
 
     ## test
     with torch.no_grad():
-        set_eval()
+        # set_eval()
 
         print('generate mesh (test) ...')
         for i in tqdm(range(start_id, end_id)):
@@ -217,9 +218,39 @@ def recon(opt, use_rect=False):
                     save_path = '%s/result_%s_%d.obj' % (opt.results_path, test_data['name'], j)
                     gen_mesh(opt.resolution, netMR, cuda, test_data, save_path, components=opt.use_compose)
 
-def reconWrapper(args=None, use_rect=False):
+def reconWrapper(net, args=None, use_rect=False):
     opt = parser.parse(args)
-    recon(opt, use_rect)
+    recon(net, opt, use_rect)
+
+def get_model(args):
+    opt = parser.parse(args)
+
+    # load checkpoints
+    state_dict_path = None
+    if opt.load_netMR_checkpoint_path is not None:
+        state_dict_path = opt.load_netMR_checkpoint_path
+
+    state_dict = None
+    if state_dict_path is not None and os.path.exists(state_dict_path):
+        print('Resuming from ', state_dict_path)
+        state_dict = torch.load(state_dict_path)
+
+    opt = state_dict['opt']
+    opt.resolution = 256
+    opt.loadSize = 1024
+
+    cuda = torch.device('cuda')
+
+    opt_netG = state_dict['opt_netG']
+    netG = HGPIFuNetwNML(opt_netG).to(device=cuda)
+    netMR = HGPIFuMRNet(opt, netG).to(device=cuda)
+
+    netG.eval()
+
+    # load checkpoints
+    netMR.load_state_dict(state_dict['model_state_dict'])
+
+    return netMR
 
 if __name__ == '__main__':
     reconWrapper()

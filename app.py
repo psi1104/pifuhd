@@ -10,17 +10,18 @@ import time
 from queue import Empty, Queue
 
 from lightweight_human_pose_estimation_pytorch.get_pose import get_pose, get_pose_model
-from apps.simple_test import run
+from apps.simple_test import run, get_render_model
 
 from flask import Flask, request, jsonify, render_template, send_file
 from werkzeug.utils import secure_filename
-from Naked.toolshed.shell import execute_js, muterun_js
-import json
+from Naked.toolshed.shell import execute_js
 
 DATA_FOLDER = 'img_data'
 CONVERTER_PATH = './static/converter.js'
 
 pose_model = get_pose_model()
+render_model = get_render_model()
+
 app = Flask(__name__, template_folder='static')
 
 @app.route('/predict', methods=['POST'])
@@ -43,7 +44,7 @@ def predict():
 
     data_path = os.path.join(DATA_FOLDER, f_id)
 
-    run(data_path)
+    run(render_model, data_path)
 
     # result = muterun_js(CONVERTER_PATH, data_path)
     # print(type(result.stdout))
