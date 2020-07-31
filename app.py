@@ -9,7 +9,7 @@ import threading
 import time
 from queue import Empty, Queue
 
-from lightweight_human_pose_estimation_pytorch.get_pose import get_pose
+from lightweight_human_pose_estimation_pytorch.get_pose import get_pose, get_pose_model
 from apps.simple_test import run
 
 from flask import Flask, request, jsonify, render_template, send_file
@@ -20,6 +20,7 @@ import json
 DATA_FOLDER = 'img_data'
 CONVERTER_PATH = './static/converter.js'
 
+pose_model = get_pose_model()
 app = Flask(__name__, template_folder='static')
 
 @app.route('/predict', methods=['POST'])
@@ -38,7 +39,7 @@ def predict():
 
     image_path = os.path.join(DATA_FOLDER, f_id, fname)
 
-    get_pose(image_path)
+    get_pose(pose_model, image_path)
 
     data_path = os.path.join(DATA_FOLDER, f_id)
 
