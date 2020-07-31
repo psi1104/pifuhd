@@ -1,16 +1,13 @@
-import io
 import os
-import sys
 import shutil
 import uuid
-import copy
 
 import threading
 import time
 from queue import Empty, Queue
 
 from lightweight_human_pose_estimation_pytorch.get_pose import get_pose, get_pose_model
-from apps.simple_test import run, get_render_model
+from apps.simple_test import render_obj, get_render_model
 
 from flask import Flask, request, jsonify, render_template, send_file
 from werkzeug.utils import secure_filename
@@ -22,16 +19,20 @@ CONVERTER_PATH = './static/converter.js'
 pose_model = get_pose_model()
 render_model = get_render_model()
 
+requests_queue = Queue()
+
+#remove image data
+def remove_image(f_id):
+    data_path = os.path.join(DATA_FOLDER, f_id)
+    shutil.rmtree(data_path)
+
 app = Flask(__name__, template_folder='static')
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    input_file = request.files['source']
+BATCH_SIZE=1
+CHECK_INTERVAL=0.1
 
-    if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
-        return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
+def run(input_file, f_id):
 
-    f_id = str(uuid.uuid4())
     fname = secure_filename(input_file.filename)
 
     # save image to upload folder
@@ -44,7 +45,7 @@ def predict():
 
     data_path = os.path.join(DATA_FOLDER, f_id)
 
-    run(render_model, data_path)
+    render_obj(render_model, data_path)
 
     # result = muterun_js(CONVERTER_PATH, data_path)
     # print(type(result.stdout))
@@ -53,9 +54,67 @@ def predict():
 
     execute_js(CONVERTER_PATH, data_path)
 
-    result = os.path.join(data_path, 'model.gltf')
+    result_path = os.path.join(data_path, 'model.gltf')
 
-    return send_file(result, mimetype='gltf/json')
+    return result_path
+
+def handle_requests_by_batch():
+    try:
+        while True:
+            requests_batch = []
+
+            while not (
+              len(requests_batch) >= BATCH_SIZE # or
+              #(len(requests_batch) > 0 #and time.time() - requests_batch[0]['time'] > BATCH_TIMEOUT)
+            ):
+              try:
+                requests_batch.append(requests_queue.get(timeout=CHECK_INTERVAL))
+              except Empty:
+                continue
+
+            batch_outputs = []
+
+            for request in requests_batch:
+                batch_outputs.append(run(request['input'][0], request['input'][1]))
+
+            for request, output in zip(requests_batch, batch_outputs):
+                request['output'] = output
+
+    except Exception as e:
+        while not requests_queue.empty():
+            requests_queue.get()
+        print(e)
+
+threading.Thread(target=handle_requests_by_batch).start()
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    print(requests_queue.qsize())
+    if requests_queue.qsize() >= 1:
+        return jsonify({'message': 'Too Many Requests'}), 429
+
+    input_file = request.files['source']
+    f_id = str(uuid.uuid4())
+
+    if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
+        return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
+
+    req = {
+        'input': [input_file, f_id]
+    }
+
+    requests_queue.put(req)
+
+    while 'output' not in req:
+        time.sleep(CHECK_INTERVAL)
+
+    result_path = req['output']
+
+    result = send_file(result_path, mimetype='model/gltf+json')
+
+    remove_image(f_id)
+
+    return result
 
 @app.route('/health')
 def health():
