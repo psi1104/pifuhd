@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import uuid
 
@@ -8,6 +9,7 @@ from queue import Empty, Queue
 
 from lightweight_human_pose_estimation_pytorch.get_pose import get_pose, get_pose_model
 from apps.simple_test import render_obj, get_render_model
+from apps.clean_mesh import meshcleaning
 
 from flask import Flask, request, jsonify, render_template, send_file
 from werkzeug.utils import secure_filename
@@ -47,6 +49,8 @@ def run(input_file, f_id):
 
     render_obj(render_model, data_path)
 
+    meshcleaning(data_path)
+
     # result = muterun_js(CONVERTER_PATH, data_path)
     # print(type(result.stdout))
     # result = json.dumps(result.stdout)
@@ -54,7 +58,7 @@ def run(input_file, f_id):
 
     execute_js(CONVERTER_PATH, data_path)
 
-    result_path = os.path.join(data_path, 'model.gltf')
+    result_path = os.path.join(data_path, 'model.glb')
 
     return result_path
 
@@ -110,7 +114,7 @@ def predict():
 
     result_path = req['output']
 
-    result = send_file(result_path, mimetype='model/gltf+json')
+    result = send_file(result_path, mimetype='model/gltf-binary')
 
     remove_image(f_id)
 
