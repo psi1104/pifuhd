@@ -51,11 +51,6 @@ def run(input_file, f_id):
 
     meshcleaning(data_path)
 
-    # result = muterun_js(CONVERTER_PATH, data_path)
-    # print(type(result.stdout))
-    # result = json.dumps(result.stdout)
-    # print(type(resultß))
-
     execute_js(CONVERTER_PATH, data_path)
 
     result_path = os.path.join(data_path, 'model.glb')
