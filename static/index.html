@@ -41,24 +41,20 @@ limitations under the License.
   <div class = "container">
     <div class="jumbotron mt-3">
 
-        <h1>pifuhd</h1>
-        <h3>It changes the face of a person or animal into various facial styles. Try it!</h3>
-        <A>Origin Git Hub repository : </A> <A href="https://github.com/clovaai/stargan-v2"> Origin StarGAN-v2 repo</A>
+        <h1>PIFuHD</h1>
+        <h3>It creates 3D objects for picture of the human body. Try it!</h3>
+        <A>Git Hub repository : </A> <A href="https://github.com/psi1104/pifuhd"> PIFuHD repo</A>
         <br>
-        <A>Git Hub repository : </A> <A href="https://link.ainize.ai/github_starganv2"> StarGAN-v2 repo</A>
-        <br>
-        <A>Testing API : </A> <A href="https://stargan-v2-psi1104.endpoint.ainize.ai"> on Ainize </A>
+        <A>Testing API : </A> <A href="https://pifuhd-psi1104.endpoint.ainize.ai/"> on Ainize </A>
 
         <hr class="solid">
 
         <h2>Usage</h2>
         <div id="usage">
             <p>1. Please name the image file in English or in numbers.</p>
-            <p>2. Please let the target face go into the whole picture.</p>
-            <p> Tip.StarGan-v2 requires a clear photo of your face such as an ID card for better results</p>
-            <p>3. Please select the face type you want.</p>
-            <p>4. Please upload the image file you want to convert.</p>
-            <p>5. Please press the Run button and wait for about 10 seconds.</p>
+            <p>2. Please upload the image file of a person alone you want to render 3D object.</p>
+            <p> Tip.PifUHD requires full-body image that looks at the front of size 500 * 500 or more for better results</p>
+            <p>3. Please press the Run button and wait for about 20 seconds.</p>
         </div>
         <h2>Upload </h2>
         <div id = 'inputImage'>
@@ -70,13 +66,14 @@ limitations under the License.
 
         <div id ='resultBox' style="margin-left: auto; margin-right: auto;">
             <p id='errorbox'></p>
-            <img id='resultImage'  style="max-width:100%; max-height:100%;">
-            <!--src="{{url_for('static', filename='sample.jpeg')}}"-->
+            <img id='resultImage' src="{{url_for('static', filename='test.png')}}"  style="width: 300px; height: 300px; max-width: 100%; max-height: 100%;">
+
             <model-viewer id='resultModel'
-                auto-rotate camera-controls
-                alt="A 3D model of an astronaut">
+                          src="{{ url_for('static', filename='sample.gltf')}}"
+                          auto-rotate camera-controls
+                          alt="A 3D model of an astronaut"
+                          style="height: 300px">
             </model-viewer>
-            <!--src="{{ url_for('static', filename='model.gltf')}}"-->
         </div>
 
         <script>
@@ -95,6 +92,8 @@ limitations under the License.
                 }
 
                 const source = document.getElementById('source').files[0]
+
+                document.getElementById("resultImage").src = URL.createObjectURL(source);
 
                 formData.append('source', source)
 
