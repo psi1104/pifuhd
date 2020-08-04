@@ -28,7 +28,9 @@ def remove_image(f_id):
     data_path = os.path.join(DATA_FOLDER, f_id)
     shutil.rmtree(data_path)
 
+#############################################################
 app = Flask(__name__, template_folder='static')
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
 
 BATCH_SIZE=1
 CHECK_INTERVAL=0.1
@@ -124,7 +126,7 @@ def main():
     return render_template('index.html')
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port='80')
+    app.run(debug=False, host='0.0.0.0', port='80', threaded=True)
 
 
 
