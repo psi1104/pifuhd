@@ -53,10 +53,16 @@ limitations under the License.
         <div id="usage">
             <p>1. Please name the image file in English or in numbers.</p>
             <p>2. Please upload the image file of a person alone you want to create 3D object.</p>
-            <p> Tip.For better results, the PIfUHD requires a full-body image standing alone, facing the front of 500 * 500 or more size.</p>
+            <p> Tip.For better results, the PIfUHD requires a full-body image standing alone, 500 * 500 or more size.</p>
             <p>3. Please press the Run button and wait for about 20 seconds.</p>
         </div>
         <h2>Upload </h2>
+        <div id="sampleBox" style="margin-bottom: 5px;">
+            <p style="display:inline">Sample : </p>
+            <a href="https://raw.githubusercontent.com/psi1104/pifuhd/master/sample_images/sample1.jpg" download>Sample Image1</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="https://raw.githubusercontent.com/psi1104/pifuhd/master/sample_images/sample2.jpg" download>Sample Image2</a>
+        </div>
         <div id = 'inputImage'>
             <label for="source"> Upload image : </label>
             <input type = 'file' id = 'source' style="margin-right: 10px; margin-bottom: 10px;">
@@ -74,6 +80,10 @@ limitations under the License.
                           alt="A 3D model of an astronaut"
                           style="height: 300px">
             </model-viewer>
+            <a href="" id="down" download>
+                <button id = "download" type='button' disabled='true' class="fa fa-download" style="margin-left: auto;"> Download glb file </button>
+            </a>
+            <p>* Please write .glb at the end of the download file name.</p>
         </div>
 
         <script>
@@ -96,6 +106,7 @@ limitations under the License.
                 document.getElementById("resultImage").src = URL.createObjectURL(source);
                 document.getElementById("resultModel").setAttribute('src', "");
                 document.getElementById("resultModel").removeAttribute('src');
+                document.getElementById("download").disabled = true;
 
                 formData.append('source', source)
 
@@ -124,8 +135,10 @@ limitations under the License.
                 .then(blob => URL.createObjectURL(blob))
                 .then(imageURL => {
                     document.getElementById("resultModel").src = imageURL;
+                    document.getElementById("down").setAttribute('href', imageURL);
                     document.getElementById("errorbox").innerHTML = "";
                     document.getElementById("submit").disabled = false;
+                    document.getElementById("download").disabled = false;
                 })
                 .catch(e =>{
                     document.getElementById("errorbox").innerHTML = e;
