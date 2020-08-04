@@ -53,13 +53,14 @@ limitations under the License.
         <div id="usage">
             <p>1. Please name the image file in English or in numbers.</p>
             <p>2. Please upload the image file of a person alone you want to create 3D object.</p>
-            <p> Tip.For better results, the PifUHD requires a full-body image standing alone, facing the front of 500 * 500 or more.</p>
+            <p> Tip.For better results, the PIfUHD requires a full-body image standing alone, facing the front of 500 * 500 or more size.</p>
             <p>3. Please press the Run button and wait for about 20 seconds.</p>
         </div>
         <h2>Upload </h2>
         <div id = 'inputImage'>
             <label for="source"> Upload image : </label>
             <input type = 'file' id = 'source' style="margin-right: 10px; margin-bottom: 10px;">
+            <p>* Please upload an image file that is less than 1MB.</p>
             <button id = "submit" type='submit' onclick="this.disabled=true;" class="btn btn-primary btn-lg" style="margin-left: auto;"> Run </button>
         </div>
 
@@ -93,6 +94,8 @@ limitations under the License.
                 const source = document.getElementById('source').files[0]
 
                 document.getElementById("resultImage").src = URL.createObjectURL(source);
+                document.getElementById("resultModel").setAttribute('src', "");
+                document.getElementById("resultModel").removeAttribute('src');
 
                 formData.append('source', source)
 
@@ -107,8 +110,11 @@ limitations under the License.
                     if ( response.status == 200){
                         return response
                     }
-                    else if( response.status == 413){
+                    else if( response.status == 413) {
                         throw Error("This image file is larger than 1MB.")
+                    }
+                    else if( response.status == 503) {
+                        throw Error("Too Many Requests.")
                     }
                     else{
                         throw Error((await response.clone().json()).message)
