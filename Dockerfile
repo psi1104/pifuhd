@@ -26,6 +26,10 @@ RUN chmod +x ./download_trained_model.sh
 
 RUN sh ./download_trained_model.sh
 
+COPY ./static/package.json ./static/package.json
+
+RUN cd ./static && npm install
+
 COPY . .
 
 EXPOSE 80
