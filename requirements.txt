@@ -49,5 +49,6 @@ traitlets==4.3.3
 trimesh==3.7.10
 urllib3==1.25.10
 wcwidth==0.2.5
+waitress==1.4.4
 Werkzeug==1.0.1
 yacs==0.1.7
