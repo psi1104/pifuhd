@@ -1,7 +1,6 @@
 FROM pytorch/pytorch:1.5.1-cuda10.1-cudnn7-runtime
-
 RUN apt-get update
-RUN apt-get install -y libsm6 libxrender-dev libxext6 libglib2.0-0 freeglut3-dev gcc g++ curl
+RUN apt-get install -y libsm6 libxrender-dev libxext6 libglib2.0-0 freeglut3-dev gcc g++ curl wget
 
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 ENV NODE_VERSION=12.6.0
@@ -20,6 +19,12 @@ COPY requirements.txt .
 
 #install python package
 RUN pip install -r requirements.txt
+
+COPY ./scripts/download_trained_model.sh .
+
+RUN chmod +x ./download_trained_model.sh
+
+RUN sh ./download_trained_model.sh
 
 COPY . .
 
