@@ -33,6 +33,8 @@ RUN cd ./static && npm install
 
 COPY . .
 
+RUN wget https://raw.githubusercontent.com/psi1104/pifuhd/master/lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth -O lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth
+
 EXPOSE 80
 
 CMD python app.py
