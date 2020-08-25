@@ -9,6 +9,8 @@ RUN chmod +x ./download_trained_model.sh
 
 RUN sh ./download_trained_model.sh
 
+RUN mkdir lightweight_human_pose_estimation_pytorch
+
 RUN wget https://raw.githubusercontent.com/psi1104/pifuhd/master/lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth -O lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth
 
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
@@ -22,7 +24,6 @@ RUN node --version
 RUN npm --version
 
 RUN pip install --upgrade pip
-
 ENV FORCE_CUDA = "1"
 COPY requirements.txt .
 
