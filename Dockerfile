@@ -9,6 +9,8 @@ RUN chmod +x ./download_trained_model.sh
 
 RUN sh ./download_trained_model.sh
 
+RUN wget https://raw.githubusercontent.com/psi1104/pifuhd/master/lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth -O lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth
+
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 ENV NODE_VERSION=12.6.0
 ENV NVM_DIR=/root/.nvm
@@ -32,8 +34,6 @@ COPY ./static/package.json ./static/package.json
 RUN cd ./static && npm install
 
 COPY . .
-
-RUN wget https://raw.githubusercontent.com/psi1104/pifuhd/master/lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth -O lightweight_human_pose_estimation_pytorch/checkpoint_iter_370000.pth
 
 EXPOSE 80
 
